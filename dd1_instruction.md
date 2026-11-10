@@ -1,4 +1,4 @@
-We expect that your final document will be 5–10 pages long, where each page has a word density similar to what
+We expect that your final document will be 5–10 pages long, where each page has a word density similar to what<hr>
 you see in this guideline document.
 Organize your document into sections, using the following headings:
 •Introduction (if needed)
