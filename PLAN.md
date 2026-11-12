@@ -9,38 +9,37 @@ classDiagram
     }
     class Pieces {
         <<abstract>>
-        +getPosition(): Position
         +isCaptured(): bool
         +getColour(): string
         +getPiece(): string
-        +possibleMoves(board: Board): vector~Position~
-        +captureMoves(board: Board): vector~Position~
+        +possibleMoves(board: Board, from: Position): vector~Position~
+        +captureMoves(board: Board, from: Position): vector~Position~
     }
     class Pawn {
-        +possibleMoves(board: Board): vector~Position~
-        +captureMoves(board: Board): vector~Position~
+        +possibleMoves(board: Board, from: Position): vector~Position~
+        +captureMoves(board: Board, from: Position): vector~Position~
         +promote(newPiece: string): void
     }
     class Knight {
-        +possibleMoves(board: Board): vector~Position~
-        +captureMoves(board: Board): vector~Position~
+        +possibleMoves(board: Board, from: Position): vector~Position~
+        +captureMoves(board: Board, from: Position): vector~Position~
     }
     class Bishop {
-        +possibleMoves(board: Board): vector~Position~
-        +captureMoves(board: Board): vector~Position~
+        +possibleMoves(board: Board, from: Position): vector~Position~
+        +captureMoves(board: Board, from: Position): vector~Position~
     }
     class Rook {
-        +possibleMoves(board: Board): vector~Position~
-        +captureMoves(board: Board): vector~Position~
+        +possibleMoves(board: Board, from: Position): vector~Position~
+        +captureMoves(board: Board, from: Position): vector~Position~
         +hasMoved(): bool
     }
     class Queen {
-        +possibleMoves(board: Board): vector~Position~
-        +captureMoves(board: Board): vector~Position~
+        +possibleMoves(board: Board, from: Position): vector~Position~
+        +captureMoves(board: Board, from: Position): vector~Position~
     }
     class King {
-        +possibleMoves(board: Board): vector~Position~
-        +captureMoves(board: Board): vector~Position~
+        +possibleMoves(board: Board, from: Position): vector~Position~
+        +captureMoves(board: Board, from: Position): vector~Position~
         +hasMoved(): bool
         +isInCheck(board: Board): bool
     }
@@ -53,8 +52,9 @@ classDiagram
     Pieces <|-- King
 
     class Board {
+        -grid: Pieces*[8][8]
         +getPieceAt(square: Position): Pieces*
-        +initialize(): void
+        +initialize(setup: BoardSetup): void
         +whoseTurn(): string
         +isLegal(move: Move): bool
         +updateBoard(move: Move): void
@@ -67,6 +67,7 @@ classDiagram
     }
 
     class Players {
+        <<abstract>>
         +getColour(): string
         +chooseMove(board: Board): Move
     }
@@ -84,13 +85,14 @@ classDiagram
     
 
     class GameManagement {
+        +handleSetup(command: string): void
         +startGame(): void
         +run(): void
         +readsCommand(): string
         +handleMoves(move: Move): bool
         +endGame(): void
         +resign(): void
-        +updateScore(winner: string): void
+        +updateScore(result: string): void
         +printScore(): void
     }
 
@@ -128,7 +130,7 @@ if required.
 
 To allow the computer to play standard openings, we would create an Opening class that reads opening move sequences from a file.
 We would also need to add a move history tracker by storing a linked list of move records in GameManagement. Each node would contain the player’s colour, 
-piece type, starting position, destination position, and promotion choice if applicable. After each move, we would append a node to the end of list. 
+piece type, starting position, destination position, and promotion choice if applicable. After each successful move, we would append a node to the end of list. 
 
 The Opening class would read this list in order to compare it with stored opening sequences. The history would reset when a new game starts.
 By comparing the current game’s move history with the stored sequences. If the history matches the beginning of an opening, this Class will return the next possible move. 
@@ -136,21 +138,29 @@ Computer would receive a suggested move from the Opening class and call Board’
 If the opponent deviates from the stored sequences, the sequence ends, or no suggested move is legal, Computer would fall back to its set difficulty based move selection.
 Keeping opening sequences in a separate file would allow us to add openings without changing the move-selection code. We would also be able to use this class for higher difficulty levels, 
 while levels 1 and 2 would continue using their existing move-selection strategies.
-Note, this will only work during defult position and not if user used a custom setup. Custom setup will defult to set difficulty move selection. 
+Note, this will only work during default position and not if user used a custom setup. Custom setup will defult to set difficulty move selection. 
 
 Q2: How would you implement a feature that would allow a player to undo his/her last move? What
 about an unlimited number of undos?
 
-We would implement undo using a linked list of move records stored in GameManagement. Each node would contain the player’s colour, piece type, starting position, destination position, 
-and promotion choice if applicable. After each successful move, we would append a node to the list.
+We would implement undo using a linked list of move records stored in GameManagement as described from the question above. 
+We would add an undoMove() function to GameManagement. It would remove the last node from the list, reset Board to the saved initial configuration, and replay the remaining moves in order. 
+Replaying would reconstruct the position, including captured pieces, promotions, castling, en passant, and whose turn it is, without adding duplicate history records or updating scores.
 
-We would also save the initial board configuration, this will help save custom setups. 
-...
+To support one undo, we will only allow this operation after a new played move. To support unlimited undos, we would allow repeated calls until the list is empty.
+If the linked list is empty, the function would leave the board unchanged and report an error that there are no moves to undo.
 
 Q3: Variations on chess abound. For example, four-handed chess is a variant that is played by
 four players (search for it!). Outline the changes that would be necessary to make your program into a
 four-handed chess game.
 
+To support four-handed chess, the Board class would need a larger grid and a way to identify squares outside the playable area as grid is not a square. 
+initialize() would place four sets of pieces, and print() would display the larger board and distinguish all four players.
+Pieces and Players would support four player colours instead of only white and black. Most pieces could retain their existing movement patterns, but their movement functions would be fitted to new board.
+
+GameManagement will need to be able to store four players, and cycle through turns. This includes resignation, elimination, scoring, and ending the game. 
+Additionally, move valdations and checks will now need to check attacks from all players. Checkmates and stalmates will only eliminate one player and not instantly end the game. 
+Lastly, setup commands and validation would also be extended to handle four colours, four kings, and the new starting positions.
 
 # Breakdown
 **Official Deadline 1: Nov 17th, 17:00**
