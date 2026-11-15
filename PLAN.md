@@ -9,9 +9,6 @@ classDiagram
     }
     class Pieces {
         <<abstract>>
-        +isCaptured(): bool
-        +getColour(): string
-        +getPiece(): string
         +possibleMoves(board: Board, from: Position): vector~Position~
         +captureMoves(board: Board, from: Position): vector~Position~
     }
@@ -31,7 +28,6 @@ classDiagram
     class Rook {
         +possibleMoves(board: Board, from: Position): vector~Position~
         +captureMoves(board: Board, from: Position): vector~Position~
-        +hasMoved(): bool
     }
     class Queen {
         +possibleMoves(board: Board, from: Position): vector~Position~
@@ -40,10 +36,8 @@ classDiagram
     class King {
         +possibleMoves(board: Board, from: Position): vector~Position~
         +captureMoves(board: Board, from: Position): vector~Position~
-        +hasMoved(): bool
         +isInCheck(board: Board): bool
     }
-    Pieces --> Position
     Pieces <|-- Pawn
     Pieces <|-- Knight
     Pieces <|-- Bishop
@@ -55,7 +49,6 @@ classDiagram
         -grid: Pieces*[8][8]
         +getPieceAt(square: Position): Pieces*
         +initialize(setup: BoardSetup): void
-        +whoseTurn(): string
         +isLegal(move: Move): bool
         +updateBoard(move: Move): void
         +print(): void
@@ -68,7 +61,6 @@ classDiagram
 
     class Players {
         <<abstract>>
-        +getColour(): string
         +chooseMove(board: Board): Move
     }
     class Human {
