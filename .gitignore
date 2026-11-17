@@ -1,0 +1,11 @@
+# Compiled object files
+*.o
+
+# Generated dependency files
+*.d
+
+# Chess executable
+/chess
+
+# macOS folder metadata
+.DS_Store
