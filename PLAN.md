@@ -12,10 +12,9 @@ classDiagram
         +int row
         +int col
     }
-    class Pieces {
-        <<abstract>>
-        +possibleMoves(board: Board, from: Position): vector~Position~
-        +captureMoves(board: Board, from: Position): vector~Position~
+    class Pieces["Pieces (abstract)"] {
+        +possibleMoves(board: Board, from: Position) vector~Position~*
+        +captureMoves(board: Board, from: Position) vector~Position~*
     }
     class Pawn {
         +possibleMoves(board: Board, from: Position): vector~Position~
@@ -73,9 +72,8 @@ classDiagram
     Board --> BoardSetup
     GameManagement --> BoardSetup
 
-    class Players {
-        <<abstract>>
-        +chooseMove(board: Board): Move
+    class Players["Players (abstract)"] {
+        +chooseMove(board: Board) Move*
     }
     class Human {
         +chooseMove(board: Board): Move
