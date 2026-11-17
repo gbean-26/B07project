@@ -1,3 +1,8 @@
+# Introduction
+Our project is a text-based chess game written in C++. It will support human and computer players, multiple computer difficulty levels, and custom starting positions. 
+The game will enforce chess rules, detect checkmate and stalemate, and track scores across multiple games. 
+We will use an object-oriented design to separate the responsibilities of pieces, the board, players, and game management.
+
 # Design
 ### UML
 ```mermaid
@@ -15,7 +20,6 @@ classDiagram
     class Pawn {
         +possibleMoves(board: Board, from: Position): vector~Position~
         +captureMoves(board: Board, from: Position): vector~Position~
-        +promote(newPiece: string): void
     }
     class Knight {
         +possibleMoves(board: Board, from: Position): vector~Position~
@@ -47,17 +51,27 @@ classDiagram
 
     class Board {
         -grid: Pieces*[8][8]
-        +getPieceAt(square: Position): Pieces*
         +initialize(setup: BoardSetup): void
         +isLegal(move: Move): bool
         +updateBoard(move: Move): void
+        +isCheckmate(colour: string): bool
+        +isStalemate(colour: string): bool
         +print(): void
     }
 
     class Move{
         +from: Position
         +to: Position
+        +promotionChoice: string
     }
+
+    class BoardSetup {
+        +layout: string[8][8]
+        +startingColour: string
+    }
+    
+    Board --> BoardSetup
+    GameManagement --> BoardSetup
 
     class Players {
         <<abstract>>
@@ -103,11 +117,13 @@ classDiagram
 **Position** and **Move** are simple class/struct used as data members in other classes. Move also holds Position as a data member.
 
 **Pieces** is an abstract base class, and the different types of actual chess pieces inherit this abstract class. Each subclass implements their own possibleMoves() and captureMoves(), according to the rule for each piece.
-- Pawn has an additional promote() function for the Promotion rule. En Passant will be handle in Pawn's captureMoves().
+- Pawn promotion will be replaced by board with the piece recorded by move. En Passant will be handle in Pawn's captureMoves().
 - Rook and King has an additional hasMove() function to check castling availability. The castling move itself will be handled in their possibleMoves().
 - King has an additional isInCheck() function.
 
-**Board** oversees the movement of pieces during one game. It performs additional validation on moves (i.e., a move that is considered fine by an individual piece, but is illegal in the game as it doesn't resolve a check on their own king/puts oneself in check), moves the pieces, updates the board, and prints the board.
+**Board** oversees the movement of pieces during one game. It performs additional validation on moves (i.e., a move that is considered fine by an individual piece, but is illegal in the game as it doesn't resolve a check on their own king/puts oneself in check), moves the pieces, checks if game has ended, updates the board, and prints the board.
+
+**BoardSetup** stores the starting piece placements and starting colour. Has default parameters and is only changed if custom setup is used. 
 
 **Players** is an abstract base class for Human and Computer. Each subclass implements their own chooseMove(). For Human, it simply takes input. For Computer, there will be an established move algorithm for each level.
 
@@ -126,11 +142,11 @@ piece type, starting position, destination position, and promotion choice if app
 
 The Opening class would read this list in order to compare it with stored opening sequences. The history would reset when a new game starts.
 By comparing the current game’s move history with the stored sequences. If the history matches the beginning of an opening, this Class will return the next possible move. 
-Computer would receive a suggested move from the Opening class and call Board’s IsLegal() function to confirm that it follows the rules and does not leave its own king in check before sending to Board.
+Computer would receive a suggested move from the Opening class and call Board’s isLegal() function to confirm that it follows the rules and does not leave its own king in check before sending to Board.
 If the opponent deviates from the stored sequences, the sequence ends, or no suggested move is legal, Computer would fall back to its set difficulty based move selection.
 Keeping opening sequences in a separate file would allow us to add openings without changing the move-selection code. We would also be able to use this class for higher difficulty levels, 
 while levels 1 and 2 would continue using their existing move-selection strategies.
-Note, this will only work during default position and not if user used a custom setup. Custom setup will defult to set difficulty move selection. 
+Note, this will only work during default position and not if user used a custom setup. Custom setup will defualt to set difficulty move selection. 
 
 Q2: How would you implement a feature that would allow a player to undo his/her last move? What
 about an unlimited number of undos?
