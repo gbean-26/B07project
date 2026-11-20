@@ -7,7 +7,15 @@ using namespace std;
 void GameManagement::handleSetup(const string &command) {
 }
 
-void GameManagement::startGame() {
+void GameManagement::startGame(const string &whiteType, const string &blackType) {
+    // Create White's player using whiteType.
+    // Create Black's player using blackType.
+
+    // Use the saved custom setup, or build the standard setup.
+    // Initialize Board with that setup.
+
+    gameRunning = true;
+    board.print();
 }
 
 // main running function
@@ -20,18 +28,41 @@ void GameManagement::run() {
         if (command.empty()) {
             continue;
         }
-
         istringstream input{command};
         string action;
         if (!(input >> action)) { // no word to read, then store in action
             continue;
         }
+        if (setupMode) { // jump to setup mode after, setupMode is changed last run
+                handleSetup(command);
+                continue;
+            }
 
         if (action == "move") {
             if (!gameRunning) {
                 cout << "No game is currently running.\n";
+                board.print();
                 continue;
             }
+
+            // computer turn 
+            if (currentPlayer->isComputer()) {
+                string extra;
+                if (input >> extra) {
+                    cout << "Computer turn, enter only: move\n";
+                    board.print();
+                    continue;
+                }
+                Move move = currentPlayer->chooseMove(board);
+                if (!handleMoves(move)) {
+                    cout << "Illegal move.\n";
+                    board.print();
+                }
+                board.print();
+                continue;
+            }
+
+            // human player turn
             string from;
             string to;
             string promotion;
@@ -44,12 +75,14 @@ void GameManagement::run() {
             if (input >> promotion) { // add to promotion
                 if (input >> extra) { // check if extra words after promotion
                     cout << "Too many arguments.\n";
+                    board.print();
                     continue;
                 }
                 // checks promotion
                 // check if only one letter, or if letter is not found in String
                 if (promotion.size() != 1 || string{"QRBNqrbn"}.find(promotion[0]) == string::npos) {
                     cout << "Invalid promotion choice.\n";
+                    board.print();
                     continue;
                 }
             }
@@ -58,6 +91,7 @@ void GameManagement::run() {
             if (from.size() != 2 || to.size() != 2) {
                 // invalid cord.
                 cout << "Invalid coordinate, format example: e2 or a1\n";
+                board.print();
                 continue;
             }
             // check cord. bounds
@@ -66,6 +100,7 @@ void GameManagement::run() {
                     from[1] < '1' || from[1] > '8' ||
                     to[1] < '1' || to[1] > '8') {
                 cout << "Coordinates out of bound, must be between a1 and h8.\n";
+                board.print();
                 continue;
             }
             // translates user input to move object to use in board
@@ -78,36 +113,73 @@ void GameManagement::run() {
             if (!handleMoves(move)) { // board fails move
                 cout << "Illegal move.\n";
             }
+            board.print();
 
         } else if (action == "resign") {
+            string extra;
+            if (input >> extra) {
+                cout << "Too many arguments.\n";
+                board.print();
+                continue;
+            }
             resign();
 
         } else if (action == "game") {
             if (gameRunning) {
-                cout << "\n";
+                cout << "Game is already running.\n";
+                board.print();
+                continue;
+            }
+            string whiteType;
+            string blackType;
+            string extra;
+
+            if (!(input >> whiteType >> blackType) || (input >> extra)) { // invalid input 
+                cout << "Invalid input use: game <white-player> <black-player>\n";
+                board.print();
+                continue;
             }
 
+            // possible values for white and black player
+            bool validWhite =
+                whiteType == "human" ||
+                whiteType == "computer[1]" ||
+                whiteType == "computer[2]" ||
+                whiteType == "computer[3]" ||
+                whiteType == "computer[4]";
+            bool validBlack =
+                blackType == "human" ||
+                blackType == "computer[1]" ||
+                blackType == "computer[2]" ||
+                blackType == "computer[3]" ||
+                blackType == "computer[4]";
+
+            if (!validWhite || !validBlack) { // not in possible values
+                cout << "Players must be human or computer[1] through computer[4].\n";
+                board.print();
+                continue;
+            }
+            startGame(whiteType, blackType);
 
         } else if (action == "setup") {
+            string extra;
+            if (input >> extra) {
+                cout << "Invalid input use: setup\n";
+                board.print();
+                continue;
+            }
+            if (gameRunning) {
+                cout << "Cannot enter setup during a game.\n";
+                board.print();
+                continue;
+            }
+            setupMode = true;
 
         } else {
             cout << "Unknown command.\n";
         }
-
-        /*
-        to impl
-         split the line into the command name and arguments.
-         if in setup mode, pass to handleSetup().
-         else, identify the command:
-            game -> validate player types, then startGame()
-            move -> validate arguments, then handleMoves()
-            setup -> enter setup mode if no game is running
-            resign -> resign() if a game is running
-        Report invalid commands or arguments.
-        */
-
     }
-    printScore();
+    printScore(); // break out from !cin
 }
 
 string GameManagement::readsCommand() {
@@ -117,7 +189,35 @@ string GameManagement::readsCommand() {
 }
 
 bool GameManagement::handleMoves(const Move &move) {
-    return false;
+    if (!gameRunning || !board.updateBoard(move)) { // no game or no move
+        return false;
+    }
+    string nextPlayer = board.whoseTurn();
+
+    if (board.isCheckmate(nextPlayer)) {
+        string winner = (nextPlayer == "white") ? "black" : "white";
+
+        if (winner == "white") {
+            cout << "Checkmate! White wins!\n";
+        } else {
+            cout << "Checkmate! Black wins!\n";
+        }
+        updateScore(winner);
+        endGame();
+
+    } else if (board.isStalemate(nextPlayer)) {
+        cout << "Stalemate!\n";
+        updateScore("draw");
+        endGame();
+
+    } else if (board.isInCheck(nextPlayer)) {
+        if (nextPlayer == "white") {
+            cout << "White is in check.\n";
+        } else {
+            cout << "Black is in check.\n";
+        }
+    }
+    return true;
 }
 
 void GameManagement::endGame() {
