@@ -3,6 +3,8 @@
 #include <string>
 #include "Move.h"
 #include "BoardSetup.h"
+#include "Position.h"
+#include <vector>
 
 class Pieces; // board store into pieces
 class Board {
@@ -11,6 +13,12 @@ private:
     std::string currentTurn = "white";
 
 public:
+    Board() = default;
+    ~Board();
+    // prevents copying
+    Board(const Board &) = delete;
+    Board &operator=(const Board &) = delete;
+
     // creates starting position (custom or defult)
     void initialize(const BoardSetup &setup);
 
@@ -23,10 +31,20 @@ public:
     // checks if move is able to be played (eg. doesnt get king in check)
     bool isLegal(const Move &move) const;
 
-    /*
-        theres more methods.. did not add all
-    */
+    bool updateBoard(const Move &move);
 
+    bool isAttacked(Position square, const std::string &byColour) const;
+    
+    bool isInCheck(const std::string &colour) const;
+    
+    bool isCheckmate(const std::string &colour) const;
+
+    bool isStalemate(const std::string &colour) const;
+
+    // Returns all legal moves for the specified colour.
+    std::vector<Move> legalMoves(const std::string &colour) const;
+
+    void print() const;
 };
 
 #endif
