@@ -1,8 +1,11 @@
 #ifndef GAME_MANAGEMENT_H
 #define GAME_MANAGEMENT_H
 #include <string>
+#include <memory>
 #include "Move.h"
 #include "Board.h"
+#include "player.h"
+#include "BoardSetup.h"
 
 class GameManagement {
 private:
@@ -11,6 +14,11 @@ private:
     double blackScore = 0;
     bool gameRunning = false; // ingame check
     bool setupMode = false;
+    // ptr for player object for current game
+    std::unique_ptr<Player> whitePlayer;
+    std::unique_ptr<Player> blackPlayer;
+    BoardSetup customSetup;
+    bool hasCustomSetup = false;
 
 public:
     // handles setup command for custom position

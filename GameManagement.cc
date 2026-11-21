@@ -1,19 +1,164 @@
 #include "GameManagement.h"
+#include "human.h"
+#include "computer.h"
+#include <memory>
 #include <iostream>
 #include <string>
 #include <sstream>
 using namespace std;
 
 void GameManagement::handleSetup(const string &command) {
+    istringstream input{command};
+    string action;
+    string extra;
+
+    if (!(input >> action)) { // more then one word
+        return;
+    }
+    if (action == "+" || action == "-") {
+        string piece;
+        string square;
+        if (action == "+") {
+            if (!(input >> piece >> square) || (input >> extra)) {
+                cout << "Invalid command use: + <piece> <square>\n";
+                return;
+            }
+            if (piece.size() != 1 ||
+                string{"KQRBNPkqrbnp"}.find(piece[0]) == string::npos) {
+                cout << "Invalid piece symbol.\n";
+                return;
+            }
+        } else {
+            if (!(input >> square) || (input >> extra)) {
+                cout << "Invalid command use: - <square>\n";
+                return;
+            }
+        }
+
+        if (square.size() != 2 ||
+            square[0] < 'a' || square[0] > 'h' ||
+            square[1] < '1' || square[1] > '8') {
+            cout << "Coordinates must be between a1 and h8.\n";
+            return;
+        }
+
+        int row = '8' - square[1];
+        int col = square[0] - 'a';
+
+        if (action == "+") {
+            customSetup.layout[row][col] = piece;
+        } else {
+            if (customSetup.layout[row][col].empty()) {
+                return; // Nothing to remove.
+            }
+
+            customSetup.layout[row][col] = "";
+        }
+        board.initialize(customSetup);
+        board.print();
+
+    } else if (action == "=") {
+        string colour;
+        if (!(input >> colour) || (input >> extra)) {
+            cout << "Invalid command use: = <white|black>\n";
+            return;
+        }
+
+        if (colour != "white" && colour != "black") {
+            cout << "Colour must be white or black.\n";
+            return;
+        }
+        customSetup.startingColour = colour;
+        board.initialize(customSetup);
+
+    } else if (action == "done") {
+        if (input >> extra) {
+            cout << "Invalid command use: done\n";
+            return;
+        }
+        int whiteKings = 0;
+        int blackKings = 0;
+        bool invalidPawn = false;
+
+        for (int row = 0; row < 8; ++row) {
+            for (int col = 0; col < 8; ++col) {
+                const string &piece = customSetup.layout[row][col];
+
+                if (piece == "K") { // check king
+                    ++whiteKings;
+                } else if (piece == "k") {
+                    ++blackKings;
+                }
+
+                // check pawn
+                if ((piece == "P" || piece == "p") && (row == 0 || row == 7)) {
+                    invalidPawn = true;
+                }
+            }
+        }
+
+        if (whiteKings != 1 || blackKings != 1) {
+            cout << "Setup requires exactly one king of each colour.\n";
+            return;
+        }
+        if (invalidPawn) {
+            cout << "Pawns cannot be on the first or last rank.\n";
+            return;
+        }
+        // run only after checking both kings exist
+        if (board.isInCheck("white") || board.isInCheck("black")) {
+            cout << "Neither king may be in check during setup.\n";
+            return;
+        }
+        hasCustomSetup = true;
+        setupMode = false;
+        cout << "Setup complete.\n";
+
+    } else {
+        cout << "Setup commands are +, -, =, and done.\n";
+    }
 }
 
 void GameManagement::startGame(const string &whiteType, const string &blackType) {
-    // Create White's player using whiteType.
-    // Create Black's player using blackType.
+    if (gameRunning) {
+        cout << "Game is already running.\n";
+        return;
+    }
 
-    // Use the saved custom setup, or build the standard setup.
-    // Initialize Board with that setup.
+    // player types have been validated in run()
+    if (whiteType == "human") {
+        whitePlayer = make_unique<Human>("white"); // class object
+    } else {
+        int level = whiteType[9] - '0';
+        whitePlayer = make_unique<Computer>("white", level);
+    }
+    if (blackType == "human") {
+        blackPlayer = make_unique<Human>("black");
+    } else {
+        int level = blackType[9] - '0';
+        blackPlayer = make_unique<Computer>("black", level);
+    }
 
+    BoardSetup setup;
+    if (hasCustomSetup) {
+        setup = customSetup;
+    } else {
+        string blackBackRow = "rnbqkbnr"; // black lowercase
+        string whiteBackRow = "RNBQKBNR";
+        // set defult position
+        for (int col = 0; col < 8; ++col) {
+            setup.layout[0][col] = blackBackRow[col];
+            setup.layout[1][col] = "p";
+            setup.layout[6][col] = "P";
+            setup.layout[7][col] = whiteBackRow[col];
+        }
+        setup.startingColour = "white"; // default
+    }
+    board.initialize(setup);
+
+    // reset
+    hasCustomSetup = false;
+    setupMode = false;
     gameRunning = true;
     board.print();
 }
@@ -45,8 +190,11 @@ void GameManagement::run() {
                 continue;
             }
 
-            // computer turn 
-            if (currentPlayer->isComputer()) {
+            Player *currentPlayer = (board.whoseTurn() == "white") 
+                ? whitePlayer.get() : blackPlayer.get();
+            
+            // Computer turn.
+            if (!currentPlayer->isHuman()) {
                 string extra;
                 if (input >> extra) {
                     cout << "Computer turn, enter only: move\n";
@@ -56,7 +204,6 @@ void GameManagement::run() {
                 Move move = currentPlayer->chooseMove(board);
                 if (!handleMoves(move)) {
                     cout << "Illegal move.\n";
-                    board.print();
                 }
                 board.print();
                 continue;
@@ -69,7 +216,8 @@ void GameManagement::run() {
             string extra; // checks if too many words
 
             if (!(input >> from >> to)) {
-                cout << "Invalid input use: move <from> <to> [promotion]\n";
+                cout << "Invalid command use: move <from> <to> [promotion]\n";
+                board.print();
                 continue;
             }
             if (input >> promotion) { // add to promotion
@@ -110,7 +258,9 @@ void GameManagement::run() {
                 promotion
             };
 
-            if (!handleMoves(move)) { // board fails move
+            Human *human = static_cast<Human *>(currentPlayer); // casting to human*
+            human->setMove(move);
+            if (!handleMoves(human->chooseMove(board))) { // board fails move
                 cout << "Illegal move.\n";
             }
             board.print();
@@ -135,7 +285,7 @@ void GameManagement::run() {
             string extra;
 
             if (!(input >> whiteType >> blackType) || (input >> extra)) { // invalid input 
-                cout << "Invalid input use: game <white-player> <black-player>\n";
+                cout << "Invalid command use: game <white-player> <black-player>\n";
                 board.print();
                 continue;
             }
@@ -164,7 +314,7 @@ void GameManagement::run() {
         } else if (action == "setup") {
             string extra;
             if (input >> extra) {
-                cout << "Invalid input use: setup\n";
+                cout << "Invalid command use: setup\n";
                 board.print();
                 continue;
             }
@@ -173,7 +323,13 @@ void GameManagement::run() {
                 board.print();
                 continue;
             }
+            // editing an empty board
+            // runs handlesetup on the next loop
+            customSetup = BoardSetup{};
+            hasCustomSetup = false;
             setupMode = true;
+            board.initialize(customSetup);
+            board.print();
 
         } else {
             cout << "Unknown command.\n";
