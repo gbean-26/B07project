@@ -20,15 +20,11 @@ private:
     BoardSetup customSetup;
     bool hasCustomSetup = false;
 
-public:
     // handles setup command for custom position
     void handleSetup(const std::string &command);
 
-    // starts game using selected player and position, sets default position if no custom is set
-    void startGame(const std::string &whiteType, const std::string &blackType);
-
-    // reads and validates user command
-    void run();
+    // starts game using selected player and position, 0 means human, and 1–4 are computer levels
+    void startGame(int whiteLevel, int blackLevel);
 
     // reads commmand from user
     std::string readsCommand();
@@ -47,6 +43,10 @@ public:
 
     // prints cumulative score for session
     void printScore() const;
+
+public:
+    // reads and validates user command
+    void run();
 };
 
 #endif

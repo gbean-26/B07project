@@ -5,17 +5,31 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <cctype>
 using namespace std;
+
+static int PlayerType(const string &type) { // local helper
+    if (type == "human") {
+        return 0;
+    }
+    for (int level = 1; level <= 4; ++level) {
+        string digit = to_string(level);
+        if (type == "computer" + digit || type == "computer[" + digit + "]") {
+            return level;
+        }
+    }
+    return -1;
+}
 
 void GameManagement::handleSetup(const string &command) {
     istringstream input{command};
     string action;
     string extra;
 
-    if (!(input >> action)) { // more then one word
+    if (!(input >> action)) { // no input
         return;
     }
-    if (action == "+" || action == "-") {
+    if (action == "+" || action == "-") { // add remove
         string piece;
         string square;
         if (action == "+") {
@@ -41,7 +55,7 @@ void GameManagement::handleSetup(const string &command) {
             cout << "Coordinates must be between a1 and h8.\n";
             return;
         }
-
+        // change size of board
         int row = '8' - square[1];
         int col = square[0] - 'a';
 
@@ -49,9 +63,8 @@ void GameManagement::handleSetup(const string &command) {
             customSetup.layout[row][col] = piece;
         } else {
             if (customSetup.layout[row][col].empty()) {
-                return; // Nothing to remove.
+                return; // nothing to remove.
             }
-
             customSetup.layout[row][col] = "";
         }
         board.initialize(customSetup);
@@ -119,24 +132,21 @@ void GameManagement::handleSetup(const string &command) {
     }
 }
 
-void GameManagement::startGame(const string &whiteType, const string &blackType) {
+void GameManagement::startGame(int whiteLevel, int blackLevel) {
     if (gameRunning) {
         cout << "Game is already running.\n";
         return;
     }
-
-    // player types have been validated in run()
-    if (whiteType == "human") {
-        whitePlayer = make_unique<Human>("white"); // class object
+    // make player object
+    if (whiteLevel == 0) {
+        whitePlayer = make_unique<Human>("white");
     } else {
-        int level = whiteType[9] - '0';
-        whitePlayer = make_unique<Computer>("white", level);
+        whitePlayer = make_unique<Computer>("white", whiteLevel);
     }
-    if (blackType == "human") {
+    if (blackLevel == 0) {
         blackPlayer = make_unique<Human>("black");
     } else {
-        int level = blackType[9] - '0';
-        blackPlayer = make_unique<Computer>("black", level);
+        blackPlayer = make_unique<Computer>("black", blackLevel);
     }
 
     BoardSetup setup;
@@ -161,6 +171,11 @@ void GameManagement::startGame(const string &whiteType, const string &blackType)
     setupMode = false;
     gameRunning = true;
     board.print();
+    if (board.isStalemate(board.whoseTurn())) {
+        cout << "Stalemate!\n";
+        updateScore("draw");
+        endGame();
+    }
 }
 
 // main running function
@@ -204,8 +219,8 @@ void GameManagement::run() {
                 Move move = currentPlayer->chooseMove(board);
                 if (!handleMoves(move)) {
                     cout << "Illegal move.\n";
+                    board.print();
                 }
-                board.print();
                 continue;
             }
 
@@ -251,6 +266,12 @@ void GameManagement::run() {
                 board.print();
                 continue;
             }
+            // make piece type upper, board determines colour
+            if (!promotion.empty()) {
+                promotion[0] = static_cast<char>(
+                    std::toupper(static_cast<unsigned char>(promotion[0]))
+                );
+            }
             // translates user input to move object to use in board
             Move move{
                 Position{'8' - from[1], from[0] - 'a'}, // from, calculate row, col
@@ -258,12 +279,12 @@ void GameManagement::run() {
                 promotion
             };
 
-            Human *human = static_cast<Human *>(currentPlayer); // casting to human*
+            Human *human = static_cast<Human *>(currentPlayer); // casting to human
             human->setMove(move);
             if (!handleMoves(human->chooseMove(board))) { // board fails move
                 cout << "Illegal move.\n";
+                board.print();
             }
-            board.print();
 
         } else if (action == "resign") {
             string extra;
@@ -290,26 +311,16 @@ void GameManagement::run() {
                 continue;
             }
 
-            // possible values for white and black player
-            bool validWhite =
-                whiteType == "human" ||
-                whiteType == "computer[1]" ||
-                whiteType == "computer[2]" ||
-                whiteType == "computer[3]" ||
-                whiteType == "computer[4]";
-            bool validBlack =
-                blackType == "human" ||
-                blackType == "computer[1]" ||
-                blackType == "computer[2]" ||
-                blackType == "computer[3]" ||
-                blackType == "computer[4]";
+            // check player input
+            int whiteLevel = PlayerType(whiteType);
+            int blackLevel = PlayerType(blackType);
 
-            if (!validWhite || !validBlack) { // not in possible values
-                cout << "Players must be human or computer[1] through computer[4].\n";
-                board.print();
+            if (whiteLevel == -1 || blackLevel == -1) {
+                cout << "Use human, computer1 to computer4, "
+                    << "or computer[1] to computer[4].\n";
                 continue;
             }
-            startGame(whiteType, blackType);
+            startGame(whiteLevel, blackLevel);
 
         } else if (action == "setup") {
             string extra;
@@ -348,6 +359,7 @@ bool GameManagement::handleMoves(const Move &move) {
     if (!gameRunning || !board.updateBoard(move)) { // no game or no move
         return false;
     }
+    board.print();
     string nextPlayer = board.whoseTurn();
 
     if (board.isCheckmate(nextPlayer)) {
