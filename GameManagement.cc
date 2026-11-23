@@ -269,7 +269,7 @@ void GameManagement::run() {
             // make piece type upper, board determines colour
             if (!promotion.empty()) {
                 promotion[0] = static_cast<char>(
-                    std::toupper(static_cast<unsigned char>(promotion[0]))
+                    toupper(static_cast<unsigned char>(promotion[0]))
                 );
             }
             // translates user input to move object to use in board
