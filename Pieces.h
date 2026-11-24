@@ -20,6 +20,9 @@ class Pieces {
                                     const std::vector<Position> &directions, bool captures) const;
 
     public:
+        // helper: true if p is on the 8x8 board
+        static bool inBounds(Position p);
+
         std::string getColour() const;
         char getSymbol() const;
         virtual std::vector<Position> possibleMoves(const Board &board, Position from) const = 0;
