@@ -14,6 +14,11 @@ class Pieces {
     protected:
         Pieces(const std::string &colour, char symbol);
 
+        // Helper function for bishop, rook, queen move calculation.
+        // captures = true for captureMoves(), false for possibleMoves()
+        std::vector<Position> slide(const Board &board, Position from, 
+                                    const std::vector<Position> &directions, bool captures) const;
+
     public:
         std::string getColour() const;
         char getSymbol() const;
