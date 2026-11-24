@@ -44,6 +44,10 @@ public:
     // Returns all legal moves for the specified colour.
     std::vector<Move> legalMoves(const std::string &colour) const;
 
+    // Pawn piece needs board to check if en passant is possible. 
+    // Return coordinate of captureable target, or {-1, -1} if none.
+    Position enPassantTarget() const;
+
     void print() const;
 };
 
