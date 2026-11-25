@@ -1,4 +1,5 @@
 #include <string>
+#include <cctype>
 #include "Pieces.h"
 #include "Board.h"
 
@@ -6,15 +7,14 @@ Pieces::Pieces(const std::string &colour, char symbol): colour{colour}, symbol{s
 
 std::string Pieces::getColour() const { return colour; }
 char Pieces::getSymbol() const { return symbol; }
-
-bool Pieces::inBounds(Position p) {
-    return p.row >= 0 && p.row < 8 && p.col >= 0 && p.col < 8;
-}
+char Pieces::getType() const { return std::toupper(static_cast<unsigned char>(symbol)); }
+bool Pieces::hasMoved() const { return moved;}
+void Pieces::setMoved() { moved = true; }
 
 std::vector<Position> Pieces::slide(const Board &board, Position from, const std::vector<Position> &directions, bool captures) const {
     std::vector<Position> moves;
     for (Position direction : directions){
-        Position to{from.row + direction.row, from.col + direction.col};
+        Position to = from + direction;
         while (inBounds(to)){
             Pieces *target = board.getPieceAt(to);
             if (!target){
@@ -23,8 +23,7 @@ std::vector<Position> Pieces::slide(const Board &board, Position from, const std
                 if (captures && target->getColour() != getColour()) { moves.push_back(to); }
                 break;
             }
-            to.row += direction.row;
-            to.col += direction.col;
+            to += direction;
         }
     }
 

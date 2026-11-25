@@ -10,6 +10,7 @@ class Pieces {
     private:
         std::string colour;
         char symbol;
+        bool moved = false;
     
     protected:
         Pieces(const std::string &colour, char symbol);
@@ -20,11 +21,11 @@ class Pieces {
                                     const std::vector<Position> &directions, bool captures) const;
 
     public:
-        // helper: true if p is on the 8x8 board
-        static bool inBounds(Position p);
-
         std::string getColour() const;
         char getSymbol() const;
+        char getType() const; // getSymbol returns exact symbol (case-sensitive), getType always returns upper case
+        bool hasMoved() const;
+        void setMoved();
         virtual std::vector<Position> possibleMoves(const Board &board, Position from) const = 0;
         virtual std::vector<Position> captureMoves(const Board &board, Position from) const = 0;
         virtual ~Pieces() = default;
