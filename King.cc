@@ -2,16 +2,13 @@
 #include <vector>
 #include "King.h"
 #include "Board.h"
+#include "Directions.h"
 
 King::King(const std::string &colour): Pieces(colour, colour == "white" ? 'K' : 'k'){}
 
-static const std::vector<Position> kingDirections = {
-    {-1,-1}, {-1,0}, {-1,1}, {0,-1}, {0,1}, {1,-1}, {1,0}, {1,1}
-};
-
 std::vector<Position> King::possibleMoves(const Board &board, Position from) const {
     std::vector<Position> moves;
-    for (Position direction: kingDirections){
+    for (Position direction: allDirections){
         Position to{from.row + direction.row, from.col + direction.col};
         if (inBounds(to) && !board.getPieceAt(to)){
             moves.push_back(to);
@@ -22,7 +19,7 @@ std::vector<Position> King::possibleMoves(const Board &board, Position from) con
 
 std::vector<Position> King::captureMoves(const Board &board, Position from) const {
     std::vector<Position> moves;
-    for (Position direction: kingDirections){
+    for (Position direction: allDirections){
         Position to{from.row + direction.row, from.col + direction.col};
         if (!inBounds(to)) {
             continue;

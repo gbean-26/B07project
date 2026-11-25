@@ -2,13 +2,9 @@
 #include <vector>
 #include "Knight.h"
 #include "Board.h"
+#include "Directions.h"
 
 Knight::Knight(const std::string &colour): Pieces(colour, colour == "white" ? 'N' : 'n'){}
-
-static const std::vector<Position> knightDirections = {
-    {-2, -1}, {-2, 1}, {-1, -2}, {-1, 2},
-    { 1, -2}, { 1, 2}, { 2, -1}, { 2, 1}
-};
 
 std::vector<Position> Knight::possibleMoves(const Board &board, Position from) const {
     std::vector<Position> moves;
