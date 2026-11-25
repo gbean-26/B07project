@@ -10,7 +10,7 @@
 class Pieces; // board store into pieces
 class Board {
 private:
-    std::unique_ptr<Pieces> grid[8][8] = {}; // default nullptr
+    mutable std::unique_ptr<Pieces> grid[8][8] = {}; // default nullptr
     std::string currentTurn = "white";
 
     // Variable needed in updateBoard(): stores position of pawn that just moved 2 squares
