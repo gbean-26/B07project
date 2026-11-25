@@ -7,10 +7,6 @@ Pieces::Pieces(const std::string &colour, char symbol): colour{colour}, symbol{s
 std::string Pieces::getColour() const { return colour; }
 char Pieces::getSymbol() const { return symbol; }
 
-bool Pieces::inBounds(Position p) {
-    return p.row >= 0 && p.row < 8 && p.col >= 0 && p.col < 8;
-}
-
 std::vector<Position> Pieces::slide(const Board &board, Position from, const std::vector<Position> &directions, bool captures) const {
     std::vector<Position> moves;
     for (Position direction : directions){

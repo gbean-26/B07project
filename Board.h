@@ -5,15 +5,22 @@
 #include "BoardSetup.h"
 #include "Position.h"
 #include <vector>
+#include <memory>
 
 class Pieces; // board store into pieces
 class Board {
 private:
-    Pieces *grid[8][8] = {}; // default nullptr
+    std::unique_ptr<Pieces> grid[8][8] = {}; // default nullptr
     std::string currentTurn = "white";
 
+    // Variable needed in updateBoard(): stores position of pawn that just moved 2 squares
+    Position enPassant{-1, -1};
+
+    // Helper function: create piece, given symbol. Used with initialize()
+    static std::unique_ptr<Pieces> createPiece(const std::string &symbol);
+
 public:
-    Board() = default;
+    Board();
     ~Board();
     // prevents copying
     Board(const Board &) = delete;
