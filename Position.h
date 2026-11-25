@@ -9,6 +9,16 @@ struct Position {
     bool operator==(const Position& other) const {
         return row == other.row && col == other.col;
     }
+    
+    Position operator+(const Position& other) const {
+        return {row + other.row, col + other.col};
+    }
+    
+    Position &operator+=(const Position& other) {
+        row += other.row;
+        col += other.col;
+        return *this;
+    }
 };
 
 // true if p is on the 8x8 board

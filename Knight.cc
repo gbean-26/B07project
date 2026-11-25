@@ -10,7 +10,7 @@ std::vector<Position> Knight::possibleMoves(const Board &board, Position from) c
     std::vector<Position> moves;
 
     for (Position direction : knightDirections){
-        Position to{from.row + direction.row, from.col + direction.col};
+        Position to = from + direction;
         if (inBounds(to) && !board.getPieceAt(to)) {
             moves.push_back(to);
         }
@@ -21,7 +21,7 @@ std::vector<Position> Knight::possibleMoves(const Board &board, Position from) c
 std::vector<Position> Knight::captureMoves(const Board &board, Position from) const {
     std::vector<Position> moves;
     for (Position direction : knightDirections){
-        Position to{from.row + direction.row, from.col + direction.col};
+        Position to = from + direction;
         if (!inBounds(to)) {
             continue;
         }

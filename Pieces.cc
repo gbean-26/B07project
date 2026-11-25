@@ -12,7 +12,7 @@ char Pieces::getType() const { return std::toupper(static_cast<unsigned char>(sy
 std::vector<Position> Pieces::slide(const Board &board, Position from, const std::vector<Position> &directions, bool captures) const {
     std::vector<Position> moves;
     for (Position direction : directions){
-        Position to{from.row + direction.row, from.col + direction.col};
+        Position to = from + direction;
         while (inBounds(to)){
             Pieces *target = board.getPieceAt(to);
             if (!target){
@@ -21,8 +21,7 @@ std::vector<Position> Pieces::slide(const Board &board, Position from, const std
                 if (captures && target->getColour() != getColour()) { moves.push_back(to); }
                 break;
             }
-            to.row += direction.row;
-            to.col += direction.col;
+            to += direction;
         }
     }
 
