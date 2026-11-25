@@ -10,6 +10,7 @@ class Pieces {
     private:
         std::string colour;
         char symbol;
+        bool moved = false;
     
     protected:
         Pieces(const std::string &colour, char symbol);
@@ -23,6 +24,8 @@ class Pieces {
         std::string getColour() const;
         char getSymbol() const;
         char getType() const; // getSymbol returns exact symbol (case-sensitive), getType always returns upper case
+        bool hasMoved() const;
+        void setMoved();
         virtual std::vector<Position> possibleMoves(const Board &board, Position from) const = 0;
         virtual std::vector<Position> captureMoves(const Board &board, Position from) const = 0;
         virtual ~Pieces() = default;
