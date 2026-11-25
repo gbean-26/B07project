@@ -22,6 +22,7 @@ class Pieces {
     public:
         std::string getColour() const;
         char getSymbol() const;
+        char getType() const; // getSymbol returns exact symbol (case-sensitive), getType always returns upper case
         virtual std::vector<Position> possibleMoves(const Board &board, Position from) const = 0;
         virtual std::vector<Position> captureMoves(const Board &board, Position from) const = 0;
         virtual ~Pieces() = default;
