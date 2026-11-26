@@ -7,6 +7,9 @@
 # Chess executable
 /chess
 
+# test.actuals from tests/runSuite.sh
+/tests/*.actual
+
 # Failing game outputs from tests/computer_smoke.sh
 /tests/smoke_failures/
 

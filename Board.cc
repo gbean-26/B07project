@@ -283,6 +283,7 @@ Position Board::enPassantTarget() const {
 }
 
 void Board::print() const {
+    std::cout << std::endl; // blank line separates the board from earlier output
     for (int row = 0; row < 8; ++row){
         std::cout << 8 - row << ' ';
         for (int col = 0; col < 8; ++col){

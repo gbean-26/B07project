@@ -1,3 +1,4 @@
+
 8 rnbqkbnr
 7 pppppppp
 6  _ _ _ _
@@ -9,6 +10,7 @@
 
   abcdefgh
 Illegal move.
+
 8 rnbqkbnr
 7 pppppppp
 6  _ _ _ _
@@ -20,6 +22,7 @@ Illegal move.
 
   abcdefgh
 Illegal move.
+
 8 rnbqkbnr
 7 pppppppp
 6  _ _ _ _
@@ -30,6 +33,7 @@ Illegal move.
 1 RNBQKBNR
 
   abcdefgh
+
 8 rnbqkbnr
 7 pppppppp
 6  _ _ _ _
@@ -40,6 +44,7 @@ Illegal move.
 1 RNBQKBNR
 
   abcdefgh
+
 8 rnbqkbnr
 7 ppppp pp
 6  _ _ p _
@@ -50,6 +55,7 @@ Illegal move.
 1 RNBQKBNR
 
   abcdefgh
+
 8 rnbqkbnr
 7 ppppp pp
 6  _ _ p _
@@ -62,6 +68,7 @@ Illegal move.
   abcdefgh
 Black is in check.
 Illegal move.
+
 8 rnbqkbnr
 7 ppppp pp
 6  _ _ p _
@@ -72,6 +79,7 @@ Illegal move.
 1 RNB KBNR
 
   abcdefgh
+
 8 rnbqkbnr
 7 ppppp _p
 6  _ _ pp_
