@@ -136,7 +136,52 @@ bool Board::isLegal(const Move &move) const {
 }
 
 bool Board::updateBoard(const Move &move) {
+    if (!isLegal(move)) return false;
 
+    Pieces *piece = getPieceAt(move.from);
+
+    // Determine move type: en passant/castling/two-square pawn move/promotion/etc
+    const bool isEnPassant = (piece->getType() == 'P' && !getPieceAt(move.to) && move.from.col != move.to.col);
+    const bool isCastling = (piece->getType() == 'K' && std::abs(move.from.col - move.to.col) == 2);
+    const bool isTwoSquarePawnMove = (piece->getType() == 'P' && std::abs(move.from.row - move.to.row) == 2);
+    const bool isPromotion = (piece->getType() == 'P' && (move.to.row == 0 || move.to.row == 7));
+
+    // En passant: captured piece needs to be deleted manually
+    if (isEnPassant){ grid[move.from.row][move.to.col] = nullptr; }
+
+    // Move piece. Captured piece automatically deleted
+    grid[move.to.row][move.to.col] = std::move(grid[move.from.row][move.from.col]);
+
+    // Castling: move rook
+    if (isCastling){
+        int castleRow = (currentTurn == "white" ? 7 : 0);
+        if (move.to.col - move.from.col > 0){ // Kingside
+            grid[castleRow][5] = std::move(grid[castleRow][7]);
+            getPieceAt({castleRow,5})->setMoved();
+        } else { // Queenside
+            grid[castleRow][3] = std::move(grid[castleRow][0]);
+            getPieceAt({castleRow,3})->setMoved();
+        }
+    }
+
+    // Promotion: replace piece
+    if (isPromotion){
+        char promoteType = move.promotionChoice[0];
+        if (currentTurn == "black"){ promoteType = std::tolower(static_cast<unsigned char>(promoteType)); }
+        grid[move.to.row][move.to.col] = createPiece(std::string(1, promoteType));
+        piece = getPieceAt(move.to);
+    }
+
+    // Setmoved (for castled rooks, it was done inside isCastling)
+    piece->setMoved();
+
+    // Update enPassant
+    enPassant = isTwoSquarePawnMove ? move.to : Position{-1, -1};
+
+    // Switch currentTurn
+    currentTurn = (currentTurn == "white" ? "black" : "white");
+
+    return true;
 }
 
 // Checks if a position is attacked (not piece: castling paths need to be checked)
@@ -193,15 +238,44 @@ bool Board::isInCheck(const std::string &colour) const {
 }
 
 bool Board::isCheckmate(const std::string &colour) const {
-
+    return (isInCheck(colour) && legalMoves(colour).empty());
 }
 
 bool Board::isStalemate(const std::string &colour) const {
-
+    return (!isInCheck(colour) && legalMoves(colour).empty());
 }
 
 std::vector<Move> Board::legalMoves(const std::string &colour) const {
+    std::vector<Move> legalMoves;
+    for (int row = 0; row < 8; ++row){
+        for (int col = 0; col < 8; ++col){
+            Pieces *piece = getPieceAt(Position{row,col});
+            if (!piece || piece->getColour() != colour) continue;
+            Position from = Position{row,col};
 
+            std::vector<Position> allMoves = piece->possibleMoves(*this, from);
+            std::vector<Position> captureMoves = piece->captureMoves(*this, from);
+            allMoves.insert(allMoves.end(), captureMoves.begin(), captureMoves.end());
+            
+            for (Position to: allMoves){
+                Move move = Move{from, to, ""};
+                bool isPromotion = piece->getType() == 'P' && (to.row == 0 || to.row == 7);
+                // test if promotion is legal
+                if (isPromotion) move.promotionChoice = "Q";
+                if (!isLegal(move)) continue;
+                // add promotion moves if is legal
+                if (isPromotion){ 
+                    for (const char *choice : {"Q", "R", "B", "N"}) {
+                        move.promotionChoice = choice;
+                        legalMoves.push_back(move);
+                    }
+                } else {
+                    legalMoves.push_back(move);
+                }
+            }
+        }
+    }
+    return legalMoves;
 }
 
 Position Board::enPassantTarget() const {
