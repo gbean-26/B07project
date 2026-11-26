@@ -1,0 +1,88 @@
+8 rnbqkbnr
+7 pppppppp
+6  _ _ _ _
+5 _ _ _ _ 
+4  _ _ _ _
+3 _ _ _ _ 
+2 PPPPPPPP
+1 RNBQKBNR
+
+  abcdefgh
+Illegal move.
+8 rnbqkbnr
+7 pppppppp
+6  _ _ _ _
+5 _ _ _ _ 
+4  _ _ _ _
+3 _ _ _ _ 
+2 PPPPPPPP
+1 RNBQKBNR
+
+  abcdefgh
+Illegal move.
+8 rnbqkbnr
+7 pppppppp
+6  _ _ _ _
+5 _ _ _ _ 
+4  _ _ _ _
+3 _ _ _ _ 
+2 PPPPPPPP
+1 RNBQKBNR
+
+  abcdefgh
+8 rnbqkbnr
+7 pppppppp
+6  _ _ _ _
+5 _ _ _ _ 
+4  _ _P_ _
+3 _ _ _ _ 
+2 PPPP PPP
+1 RNBQKBNR
+
+  abcdefgh
+8 rnbqkbnr
+7 ppppp pp
+6  _ _ p _
+5 _ _ _ _ 
+4  _ _P_ _
+3 _ _ _ _ 
+2 PPPP PPP
+1 RNBQKBNR
+
+  abcdefgh
+8 rnbqkbnr
+7 ppppp pp
+6  _ _ p _
+5 _ _ _ _Q
+4  _ _P_ _
+3 _ _ _ _ 
+2 PPPP PPP
+1 RNB KBNR
+
+  abcdefgh
+Black is in check.
+Illegal move.
+8 rnbqkbnr
+7 ppppp pp
+6  _ _ p _
+5 _ _ _ _Q
+4  _ _P_ _
+3 _ _ _ _ 
+2 PPPP PPP
+1 RNB KBNR
+
+  abcdefgh
+8 rnbqkbnr
+7 ppppp _p
+6  _ _ pp_
+5 _ _ _ _Q
+4  _ _P_ _
+3 _ _ _ _ 
+2 PPPP PPP
+1 RNB KBNR
+
+  abcdefgh
+Black wins!
+Final Score:
+White: 0
+Black: 1
