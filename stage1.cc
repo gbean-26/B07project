@@ -6,19 +6,9 @@
 #include <vector>
 using namespace std;
 
-// adds move to list if Board says it is legal and it is not already in list
-static void addIfLegal(const Board &board, const Move &move, vector<Move> &moves) {
-    for (const Move &m : moves) {
-        if (m.to.row == move.to.row && m.to.col == move.to.col) {
-            return; // duplicate (eg. square is in both possibleMoves and captureMoves)
-        }
-    }
-    // possibleMoves/captureMoves only follow the piece's movement rules,
-    // isLegal also checks the move doesnt leave own king in check
-    if (board.isLegal(move)) {
-        moves.push_back(move);
-    }
-}
+// addIfLegal removed; Board::legalMoves handles the same logic
+// (own king safety, castling, en passant, and one move per promotion choice Q/R/B/N).
+// Stage 1 only needs to filter and picks from that list.
 
 vector<Move> legalMovesFrom(const Board &board, Position from) {
     vector<Move> moves;
@@ -26,20 +16,12 @@ vector<Move> legalMovesFrom(const Board &board, Position from) {
     if (!piece) {
         return moves;
     }
-
-    for (const Position &to : piece->possibleMoves(board, from)) {
-        addIfLegal(board, Move{from, to, ""}, moves);
+    // legalMoves already combine possibleMoves and captureMoves, only 1 loop needed
+    for (const Move &move : board.legalMoves(piece->getColour())) {
+        if (move.from == from) {
+            moves.push_back(move);
+        }
     }
-    for (const Position &to : piece->captureMoves(board, from)) {
-        addIfLegal(board, Move{from, to, ""}, moves);
-    }
-
-    /*
-        to impl
-        pawn reaching last row needs promotionChoice (eg. "Q"),
-        needs a way to know the piece is a pawn
-    */
-
     return moves;
 }
 
