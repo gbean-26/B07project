@@ -3,6 +3,7 @@
 #include <string>
 #include "Move.h"
 #include "BoardSetup.h"
+using namespace std;
 
 class Pieces; // board store into pieces
 class Board {

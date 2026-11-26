@@ -16,7 +16,6 @@ Move Computer::chooseMove(const Board &board) {
         case 1: return levelOneMove(board);
         case 2: return levelTwoMove(board);
         case 3: return levelThreeMove(board);
-        case 4: return levelFourMove(board);
         default: return levelOneMove(board);
     }
 }
@@ -28,12 +27,6 @@ bool Computer::isHuman() const {
 int Computer::getLevel() const {
     return level;
 }
-
-/*
-    to impl
-    all levels need a list of legal moves for this colour,
-    Board doesnt have a function for that yet (eg. legalMoves(colour))
-*/
 
 Move Computer::levelOneMove(const Board &board) const {
     return stageOneMove(board, colour, rng);
@@ -49,7 +42,3 @@ Move Computer::levelThreeMove(const Board &board) const {
     return Move{};
 }
 
-Move Computer::levelFourMove(const Board &board) const {
-    // optional, fall back to level 3 for now
-    return levelThreeMove(board);
-}

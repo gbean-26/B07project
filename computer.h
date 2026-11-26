@@ -4,6 +4,7 @@
 #include <string>
 #include "player.h"
 #include "Move.h"
+using namespace std;
 
 class Computer : public Player {
 private:

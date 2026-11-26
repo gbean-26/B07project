@@ -5,6 +5,7 @@
 #include <vector>
 #include "Move.h"
 #include "Position.h"
+using namespace std;
 
 class Board;
 

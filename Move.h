@@ -2,6 +2,7 @@
 #define MOVE_H
 #include <string>
 #include "Position.h"
+using namespace std;
 
 struct Move {
     Position from;

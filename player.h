@@ -1,14 +1,16 @@
 #ifndef PLAYER_H
 #define PLAYER_H
+#include <iostream>
 #include <string>
 #include "Move.h"
+using namespace std;
 
 class Board; // player only reads the board, forward declare is enough
 
 // abstract base class for human and computer players
 class Player {
 protected:
-    std::string colour; // "white" or "black"
+    string colour; // "white" or "black"
 
 public:
     explicit Player(const std::string &colour);
@@ -22,7 +24,10 @@ public:
     virtual bool isHuman() const = 0;
 
     // returns the colour this player controls
-    std::string getColour() const;
+    string getColour() const;
+
+    // prints the player
+    friend ostream &operator<<(ostream &out, const Player &player);
 };
 
 #endif

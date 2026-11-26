@@ -2,6 +2,7 @@
 #define GAME_MANAGEMENT_H
 #include <string>
 #include "Move.h"
+using namespace std;
 
 class GameManagement {
 private:
@@ -11,7 +12,7 @@ private:
 
 public:
     // handles setup command for custom position
-    void handleSetup(const std::string& command);
+    void handleSetup(const string& command);
 
     // starts game using selected player and position, sets default position if no custom is set
     void startGame();
@@ -20,7 +21,7 @@ public:
     void run();
 
     // reads commmand from user
-    std::string readsCommand();
+    string readsCommand();
 
     // attemps to make move, returns true of move successful
     bool handleMoves(const Move& move);
